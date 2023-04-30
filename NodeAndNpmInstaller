@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Check the terminal type
+if [ -n "$BASH_VERSION" ]; then
+  rc_file="$HOME/.bashrc"
+elif [ -n "$ZSH_VERSION" ]; then
+  rc_file="$HOME/.zshrc"
+else
+  echo "Unsupported shell. Please use Bash or Zsh."
+  exit 1
+fi
+
+# Install NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+
+# Set the environment variables for NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Check if NVM is installed
+if ! command -v nvm &> /dev/null; then
+    echo "NVM is not installed. Please try again later."
+    exit 1
+fi
+
+# Install Node.js version 16.13.1
+nvm install 16.13.1
+
+# Use Node.js version 16.13.1 as the default
+nvm alias default 16.13.1
+
+# Source the rc file
+source "$rc_file"
+
+# Display the Node.js version in use
+echo "Node.js version $(node -v) has been installed successfully."
