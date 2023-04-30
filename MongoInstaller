@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Flag to keep track of whether MongoDB was installed successfully
+mongodb_installed=false
+
+# Check if the system is Arch based or Debian based
+if [ -f /etc/arch-release ]; then
+  echo "Arch based system detected"
+  # Install MongoDB
+  sudo pacman -S mongodb
+
+  # Install MongoDB Compass
+  yay -S mongodb-compass
+  if [ $? -eq 0 ]; then
+    echo "MongoDB and MongoDB Compass installed successfully"
+    rm mongodb-compass_1.28.1_amd64.deb
+    mongodb_installed=true
+  else
+    echo "Installation failed"
+  fi
+elif [ -f /etc/debian_version ]; then
+  echo "Debian based system detected"
+  # Import MongoDB public GPG key
+  curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg 
+
+  # Add MongoDB repository to APT sources
+  echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+
+  # Update APT package lists
+  sudo apt-get update
+
+  # Install MongoDB
+  sudo apt-get install -y mongodb-org
+
+  # Install MongoDB Compass
+  curl -O https://downloads.mongodb.com/compass/mongodb-mongosh_1.8.1_amd64.deb
+  sudo dpkg -i mongodb-mongosh_1.8.1_amd64.deb
+  if [ $? -eq 0 ]; then
+    echo "MongoDB and MongoDB Compass installed successfully"
+    rm mongodb-mongosh_1.8.1_amd64.deb
+    mongodb_installed=true
+  else
+    echo "Installation failed"
+  fi
+else
+  echo "Unsupported system"
+  exit 1
+fi
+
+# Check if MongoDB was installed successfully
+if [ $mongodb_installed == true ]; then
+  # Start MongoDB service
+  sudo systemctl start mongod
+
+  # Enable MongoDB service
+  sudo systemctl enable mongod
+fi
