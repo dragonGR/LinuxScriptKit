@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Check if the system is Arch based or Debian based
+if [ -f /etc/arch-release ]; then
+  echo "Arch based system detected"
+  # Install OpenJDK 11
+  sudo pacman -S jdk11-openjdk
+
+  # Set Java environment variables
+  export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+  export PATH=$PATH:$JAVA_HOME/bin
+elif [ -f /etc/debian_version ]; then
+  echo "Debian based system detected"
+  # Install default JRE package
+  sudo apt-get update
+  sudo apt-get install -y default-jre
+
+  # Set Java environment variables
+  export JAVA_HOME=/usr/lib/jvm/default-java
+  export PATH=$PATH:$JAVA_HOME/bin
+else
+  echo "Unsupported system"
+  exit 1
+fi
+
+echo "OpenJDK version 11.0.8 installed successfully"
